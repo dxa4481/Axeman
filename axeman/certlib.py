@@ -6,11 +6,11 @@ from collections import OrderedDict
 
 from OpenSSL import crypto
 
-CTL_LISTS = 'https://www.gstatic.com/ct/log_list/v3/all_logs_list.json'
+CTL_LISTS = 'https://www.gstatic.com/ct/log_list/v3/log_list.json'
 
-CTL_INFO = "https://{}/ct/v1/get-sth"
+CTL_INFO = "{}/ct/v1/get-sth"
 
-DOWNLOAD = "https://{}/ct/v1/get-entries?start={}&end={}"
+DOWNLOAD = "{}/ct/v1/get-entries?start={}&end={}"
 
 from construct import Struct, Byte, Int16ub, Int64ub, Enum, Bytes, Int24ub, this, GreedyBytes, GreedyRange, Terminated, Embedded
 
@@ -46,7 +46,8 @@ async def retrieve_all_ctls(session=None):
         for operator in ctl_lists['operators']:
             owner = operator['name']
             for log in operator['logs']:
-                log['url'] = log['url'].replace('https://','')
+                if not log['url'].startswith("http"):
+                    log['url'] = 'https://' + log['url']
                 if log['url'].endswith('/'):
                     log['url'] = log['url'][:-1]        
                 log['operated_by'] = owner
